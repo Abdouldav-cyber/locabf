@@ -1,34 +1,23 @@
-from django.shortcuts import render
-
-# Create your views here.
-# views.py
+# api/views.py
 from rest_framework import viewsets
-from .models import *
-from .serializers import *
+from .models import Maison, Commune, AgenceImmo, Document, Location, PaiementLoyer, Penalite, Commodite, CommoditeMaison, PhotoMaison
+from .serializers import (
+    MaisonSerializer, CommuneSerializer, AgenceImmoSerializer, DocumentSerializer,
+    LocationSerializer, PaiementLoyerSerializer, PenaliteSerializer, CommoditeSerializer,
+    CommoditeMaisonSerializer, PhotoMaisonSerializer
+)
+
+class MaisonViewSet(viewsets.ModelViewSet):
+    queryset = Maison.objects.all()
+    serializer_class = MaisonSerializer
 
 class CommuneViewSet(viewsets.ModelViewSet):
     queryset = Commune.objects.all()
     serializer_class = CommuneSerializer
 
-class PhotoMaisonViewSet(viewsets.ModelViewSet):
-    queryset = PhotoMaison.objects.all()
-    serializer_class = PhotoMaisonSerializer
-
-class CommoditeViewSet(viewsets.ModelViewSet):
-    queryset = Commodite.objects.all()
-    serializer_class = CommoditeSerializer
-
-class CommoditeMaisonViewSet(viewsets.ModelViewSet):
-    queryset = CommoditeMaison.objects.all()
-    serializer_class = CommoditeMaisonSerializer
-
 class AgenceImmoViewSet(viewsets.ModelViewSet):
     queryset = AgenceImmo.objects.all()
     serializer_class = AgenceImmoSerializer
-
-class MaisonViewSet(viewsets.ModelViewSet):
-    queryset = Maison.objects.all()
-    serializer_class = MaisonSerializer
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
@@ -45,3 +34,15 @@ class PaiementLoyerViewSet(viewsets.ModelViewSet):
 class PenaliteViewSet(viewsets.ModelViewSet):
     queryset = Penalite.objects.all()
     serializer_class = PenaliteSerializer
+
+class CommoditeViewSet(viewsets.ModelViewSet):
+    queryset = Commodite.objects.all()
+    serializer_class = CommoditeSerializer
+
+class CommoditeMaisonViewSet(viewsets.ModelViewSet):
+    queryset = CommoditeMaison.objects.all()
+    serializer_class = CommoditeMaisonSerializer
+
+class PhotoMaisonViewSet(viewsets.ModelViewSet):
+    queryset = PhotoMaison.objects.all()
+    serializer_class = PhotoMaisonSerializer
