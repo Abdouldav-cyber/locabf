@@ -2,32 +2,23 @@
 Paramètres Django pour le projet gestion_immo.
 
 Généré par 'django-admin startproject' avec Django 5.2.1.
-
-Pour plus d'informations sur ce fichier, voir
-https://docs.djangoproject.com/en/5.2/topics/settings/
-
-Pour la liste complète des paramètres et de leurs valeurs, voir
-https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
 from datetime import timedelta
 
-# Construire les chemins à l'intérieur du projet comme ceci : BASE_DIR / 'subdir'.
+# Chemin de base du projet
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Paramètres de développement rapide - non adaptés à la production
-# Voir https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# AVERTISSEMENT DE SÉCURITÉ : gardez la clé secrète utilisée en production secrète !
+# Clé secrète (à sécuriser en production)
 SECRET_KEY = 'django-insecure-a*j8cnbo^w#-v-z14$u3ma4pf5_q-lko%kl@ih&#unyck3cy&n'
 
-# AVERTISSEMENT DE SÉCURITÉ : ne pas exécuter avec le mode débogage activé en production !
+# Mode débogage (à désactiver en production)
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-# Définition des applications
+# Applications installées
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -45,7 +36,6 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',  # Inscription
     'corsheaders',
     'core',
-    'psycopg2',  # Ajout pour PostgreSQL
 ]
 
 MIDDLEWARE = [
@@ -65,7 +55,7 @@ ROOT_URLCONF = 'gestion_immo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # Ajout pour les templates d'email
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,55 +69,43 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gestion_immo.wsgi.application'
 
-# Base de données
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# Base de données PostgreSQL
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'basedav',  
-        'USER': 'postgres',  
-        'PASSWORD': 'davou64598258',  
-        'HOST': 'localhost', 
+        'NAME': 'basedav',
+        'USER': 'postgres',
+        'PASSWORD': 'davou64598258',
+        'HOST': 'localhost',
         'PORT': '5432',  # Port par défaut de PostgreSQL
     }
 }
 
 # Validation des mots de passe
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internationalisation
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
 LANGUAGE_CODE = 'fr'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Fichiers statiques (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# Fichiers statiques
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-# Type de champ de clé primaire par défaut
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Fichiers médias
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Type de champ de clé primaire par défaut
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Paramètres de REST Framework
 REST_FRAMEWORK = {
@@ -140,14 +118,14 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Paramètres de Simple JWT
+# Configuration JWT
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'TOKEN_OBTAIN_SERIALIZER': 'core.serializers.MyTokenObtainPairSerializer',  # Ajout pour utiliser email
+    'TOKEN_OBTAIN_SERIALIZER': 'rest_framework_simplejwt.serializers.TokenObtainPairSerializer',
 }
 
 # Paramètres de dj-rest-auth
@@ -156,21 +134,23 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE': None,
     'JWT_AUTH_REFRESH_COOKIE': None,
     'TOKEN_MODEL': None,
-    'LOGIN_METHODS': ['email'],
 }
 
 # Paramètres pour django-allauth
-ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Désactiver l'ancien paramètre
-ACCOUNT_EMAIL_REQUIRED = False       # Désactiver l'ancien paramètre
-ACCOUNT_USERNAME_REQUIRED = False    # Désactiver l'ancien paramètre
+SITE_ID = 1  # Obligatoire pour django-allauth
 
-ACCOUNT_LOGIN_METHODS = ['email']    # Méthodes de connexion (remplace ACCOUNT_AUTHENTICATION_METHOD)
-ACCOUNT_SIGNUP_FIELDS = ['email', 'password1', 'password2']  # Champs requis pour l'inscription
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Désactiver la vérification email
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+# ACCOUNT_SIGNUP_FORM_CLASS = 'allauth.account.forms.SignupForm'  # Supprimé
+ACCOUNT_SIGNUP_FIELDS = ['username', 'email', 'password1', 'password2']
 
-# Paramètres pour dj_rest_auth (facultatif, selon vos besoins)
-REST_AUTH_REGISTER_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'core.serializers.CustomRegisterSerializer',  # Si vous avez un sérialiseur personnalisé
-}
+# Configuration email
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Utiliser la console pour tester
+DEFAULT_FROM_EMAIL = 'no-reply@localhost'  # Adresse par défaut pour les emails
+
+
 # Paramètres CORS
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
@@ -181,23 +161,3 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# Ajout de logging pour diagnostiquer les erreurs
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-        'dj_rest_auth': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    },
-}
