@@ -1,7 +1,13 @@
+# from django.contrib import admin 
+# from .models import (
+#     Commune, PhotoMaison, Commodite, CommoditeMaison,
+#     AgenceImmo, TypeDocument, Maison, Location,
+#     PaiementLoyer, Penalite
+# )
 from django.contrib import admin
 from .models import (
     Commune, PhotoMaison, Commodite, CommoditeMaison,
-    AgenceImmo, Document, Maison, Location,
+    AgenceImmo, TypeDocument, Maison, Location,
     PaiementLoyer, Penalite
 )
 
@@ -24,35 +30,41 @@ class CommoditeAdmin(admin.ModelAdmin):
 @admin.register(CommoditeMaison)
 class CommoditeMaisonAdmin(admin.ModelAdmin):
     list_display = ('commodite', 'maison', 'nombre', 'sup')
+    list_filter = ('sup',)
 
 @admin.register(AgenceImmo)
 class AgenceImmoAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'sigle', 'telephone', 'email', 'sup')
-    search_fields = ('nom', 'sigle', 'email')
+    list_display = ('nom', 'immatriculation', 'ville', 'quartier', 'sup')
+    search_fields = ('nom', 'immatriculation', 'ville', 'quartier')
+    list_filter = ('sup',)
 
-@admin.register(Document)
-class DocumentAdmin(admin.ModelAdmin):
+@admin.register(TypeDocument)
+class TypeDocumentAdmin(admin.ModelAdmin):
     list_display = ('nom', 'sup')
+    search_fields = ('nom',)
+    list_filter = ('sup',)
 
 @admin.register(Maison)
 class MaisonAdmin(admin.ModelAdmin):
-    list_display = ('immat', 'quartier', 'loyer', 'etat', 'commune', 'agence', 'sup')
-    list_filter = ('etat', 'commune', 'agence', 'sup')
-    search_fields = ('immat', 'quartier', 'description')
+    list_display = ('immat', 'quartier', 'loyer', 'etat', 'commune', 'agence')
+    list_filter = ('etat', 'commune', 'agence')
+    search_fields = ('immat', 'quartier')
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('nomClient', 'prenomClient', 'telephoneClient', 'maison', 'dateEntre', 'dateSortie', 'sup')
-    search_fields = ('nomClient', 'prenomClient', 'numeroDocument')
-    list_filter = ('sup', 'dateEntre')
+    list_display = ('nom', 'prenom', 'client', 'maison', 'date_etablissement', 'date_expiration', 'sup')
+    search_fields = ('nom', 'prenom', 'numero')
+    list_filter = ('sup', 'date_etablissement')
 
 @admin.register(PaiementLoyer)
 class PaiementLoyerAdmin(admin.ModelAdmin):
-    list_display = ('datePaiement', 'numeroFacture', 'montant', 'location', 'sup')
-    search_fields = ('numeroFacture',)
-    list_filter = ('sup', 'datePaiement')
+    list_display = ('date_paiement', 'numero_facture', 'montant', 'location', 'sup')
+    search_fields = ('numero_facture',)
+    list_filter = ('sup', 'date_paiement')
 
 @admin.register(Penalite)
 class PenaliteAdmin(admin.ModelAdmin):
     list_display = ('montant', 'route', 'sup')
     list_filter = ('sup',)
+
+

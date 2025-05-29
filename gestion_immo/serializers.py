@@ -6,7 +6,9 @@ from .models import (
     Maison, Commune, AgenceImmo, TypeDocument, Location,
     PaiementLoyer, Penalite, Commodite, CommoditeMaison, PhotoMaison
 )
-from users.serializers import CustomUserSerializer
+
+# Import de CustomUserSerializer retiré du top-level pour éviter import circulaire
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def __init__(self, *args, **kwargs):
@@ -24,23 +26,31 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             raise serializers.ValidationError('Invalid email or password')
 
         data = super().validate(attrs)
+
+        # Import local pour éviter boucle circulaire
+        from users.serializers import CustomUserSerializer
         data['user'] = CustomUserSerializer(user).data
+
         return data
+
 
 class CommuneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Commune
         fields = '__all__'
 
+
 class PhotoMaisonSerializer(serializers.ModelSerializer):
     class Meta:
         model = PhotoMaison
         fields = '__all__'
 
+
 class CommoditeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Commodite
         fields = '__all__'
+
 
 class CommoditeMaisonSerializer(serializers.ModelSerializer):
     commodite = CommoditeSerializer(read_only=True)
@@ -49,15 +59,18 @@ class CommoditeMaisonSerializer(serializers.ModelSerializer):
         model = CommoditeMaison
         fields = '__all__'
 
+
 class AgenceImmoSerializer(serializers.ModelSerializer):
     class Meta:
         model = AgenceImmo
         fields = '__all__'
 
+
 class TypeDocumentSerializer(serializers.ModelSerializer):  # Anciennement DocumentSerializer
     class Meta:
         model = TypeDocument
         fields = '__all__'
+
 
 class MaisonSerializer(serializers.ModelSerializer):
     commune = CommuneSerializer(read_only=True)
@@ -69,14 +82,31 @@ class MaisonSerializer(serializers.ModelSerializer):
         model = Maison
         fields = '__all__'
 
+
 class LocationSerializer(serializers.ModelSerializer):
-    type_document = TypeDocumentSerializer(read_only=True)  # Mise à jour
+    type_document = TypeDocumentSerializer(read_only=True)
     maison = MaisonSerializer(read_only=True)
-    client = CustomUserSerializer(read_only=True)
+
+    # On ne déclare pas directement CustomUserSerializer ici pour éviter l'import circulaire
 
     class Meta:
         model = Location
         fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        # Import local pour éviter boucle circulaire
+        from users.serializers import CustomUserSerializer
+
+        # Sérialiser 'client' avec CustomUserSerializer si présent
+        if instance.client:
+            representation['client'] = CustomUserSerializer(instance.client).data
+        else:
+            representation['client'] = None
+
+        return representation
+
 
 class PaiementLoyerSerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
@@ -84,6 +114,7 @@ class PaiementLoyerSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaiementLoyer
         fields = '__all__'
+
 
 class PenaliteSerializer(serializers.ModelSerializer):
     route = LocationSerializer(read_only=True)

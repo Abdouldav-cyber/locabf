@@ -1,7 +1,8 @@
+# gestion_immo/urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    MaisonViewSet, CommuneViewSet, AgenceImmoViewSet, DocumentViewSet,
+    MaisonViewSet, CommuneViewSet, AgenceImmoViewSet, TypeDocumentViewSet,
     LocationViewSet, PaiementLoyerViewSet, PenaliteViewSet, CommoditeViewSet,
     CommoditeMaisonViewSet, PhotoMaisonViewSet
 )
@@ -10,7 +11,7 @@ router = DefaultRouter()
 router.register(r'maisons', MaisonViewSet)
 router.register(r'communes', CommuneViewSet)
 router.register(r'agences', AgenceImmoViewSet)
-router.register(r'documents', DocumentViewSet)
+router.register(r'type-documents', TypeDocumentViewSet)  # Mise à jour
 router.register(r'locations', LocationViewSet)
 router.register(r'paiements', PaiementLoyerViewSet)
 router.register(r'penalites', PenaliteViewSet)

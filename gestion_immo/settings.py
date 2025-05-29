@@ -27,21 +27,29 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',  # Requis pour django-allauth
+
     'rest_framework',
     'rest_framework_simplejwt',  # Pour JWT
+
+    # Ordre important : 'users' avant 'allauth' et 'dj_rest_auth'
+    'core',
+    'users',  # Application pour la gestion des utilisateurs
+
     'allauth',  # Requis pour dj-rest-auth
     'allauth.account',  # Requis pour dj-rest-auth
     'allauth.socialaccount',  # Support pour les fonctionnalités sociales
+
     'dj_rest_auth',  # APIs d'authentification
     'dj_rest_auth.registration',  # Inscription
+
     'corsheaders',
-    'core',
+    'gestion_immo',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # doit être avant CommonMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -55,11 +63,11 @@ ROOT_URLCONF = 'gestion_immo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Ajout pour les templates d'email
+        'DIRS': [BASE_DIR / 'templates'],  # Pour les templates email ou autres
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.request',
+                'django.template.context_processors.request',  # obligatoire pour django-allauth
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -73,11 +81,11 @@ WSGI_APPLICATION = 'gestion_immo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'basedav',
+        'NAME': 'baimmo',
         'USER': 'postgres',
         'PASSWORD': 'davou64598258',
         'HOST': 'localhost',
-        'PORT': '5432',  # Port par défaut de PostgreSQL
+        'PORT': '5432',
     }
 }
 
@@ -97,7 +105,7 @@ USE_TZ = True
 
 # Fichiers statiques
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [BASE_DIR / "static"]  # Assure-toi que ce dossier existe physiquement
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Fichiers médias
@@ -107,14 +115,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Type de champ de clé primaire par défaut
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Paramètres de REST Framework
+# Paramètres REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': None,
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # Temporairement autoriser tout le monde
+        'rest_framework.permissions.AllowAny',  # <-- autorise tout le monde sans authentification
     ],
 }
 
@@ -128,7 +136,7 @@ SIMPLE_JWT = {
     'TOKEN_OBTAIN_SERIALIZER': 'rest_framework_simplejwt.serializers.TokenObtainPairSerializer',
 }
 
-# Paramètres de dj-rest-auth
+# Paramètres dj-rest-auth
 REST_AUTH = {
     'USE_JWT': True,
     'JWT_AUTH_COOKIE': None,
@@ -136,28 +144,27 @@ REST_AUTH = {
     'TOKEN_MODEL': None,
 }
 
-# Paramètres pour django-allauth
-SITE_ID = 1  # Obligatoire pour django-allauth
+# Paramètres django-allauth
+SITE_ID = 1  # Obligatoire
 
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # Désactiver la vérification email
-ACCOUNT_EMAIL_REQUIRED = False
-ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'username'
-# ACCOUNT_SIGNUP_FORM_CLASS = 'allauth.account.forms.SignupForm'  # Supprimé
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Pas de vérification mail en dev
 ACCOUNT_SIGNUP_FIELDS = ['username', 'email', 'password1', 'password2']
+ACCOUNT_LOGIN_METHODS = ['username']
 
-# Configuration email
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Utiliser la console pour tester
-DEFAULT_FROM_EMAIL = 'no-reply@localhost'  # Adresse par défaut pour les emails
+# Configuration email - console pour dev
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@localhost'
 
+# Configuration CORS
+CORS_ALLOW_ALL_ORIGINS = True  # Autorise toutes les origines
+CORS_ALLOW_CREDENTIALS = True
 
-# Paramètres CORS
-CORS_ALLOW_ALL_ORIGINS = True
+# Liste blanche d’origines autorisées (utile si tu préfères restreindre)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "http://localhost:53283",
-    "http://127.0.0.1:53283",
+    # Ajoute d'autres domaines/ports front si besoin
 ]
-CORS_ALLOW_CREDENTIALS = True
 
+# Modèle utilisateur personnalisé
+AUTH_USER_MODEL = 'users.CustomUser'

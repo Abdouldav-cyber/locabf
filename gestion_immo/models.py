@@ -41,9 +41,9 @@ class TypeDocument(models.Model):
 
 class AgenceImmo(models.Model):
     nom = models.CharField(max_length=255)
-    immatriculation = models.CharField(max_length=10, unique=True)
-    ville = models.CharField(max_length=255, default="Ville inconnue")  # <--- ajout default
-    quartier = models.CharField(max_length=255, blank=True, default="")
+    immatriculation = models.CharField(max_length=10, unique=True, null=True, blank=True)
+    ville = models.CharField(max_length=255)
+    quartier = models.CharField(max_length=255, null=True, blank=True)
     lien_google_maps = models.URLField(blank=True)
     logo = models.ImageField(upload_to='logos/', blank=True)
     sup = models.BooleanField(default=False)
@@ -51,7 +51,8 @@ class AgenceImmo(models.Model):
     def __str__(self):
         return self.nom
 
-
+    def __str__(self):
+        return self.nom
 
 class Maison(models.Model):
     OCCUPEE = 'OCCUPEE'
@@ -68,8 +69,6 @@ class Maison(models.Model):
     etat = models.CharField(max_length=10, choices=ETAT_CHOICES, default=LIBRE)
     commune = models.ForeignKey(Commune, on_delete=models.CASCADE, related_name='maisons')
     agence = models.ForeignKey(AgenceImmo, on_delete=models.CASCADE, related_name='maisons')
-    sup = models.BooleanField(default=False)
-
 
     def save(self, *args, **kwargs):
         if not self.immat and self.agence:
@@ -89,7 +88,7 @@ class Location(models.Model):
     client = models.ForeignKey(
         'users.CustomUser',
         on_delete=models.CASCADE,
-        related_name='core_locations',
+        related_name='gestion_immo_locations',
         null=True,  # autorise null si besoin
         blank=True
     )
