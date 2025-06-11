@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Demande de Souscription{% endblock %}
+{% block content %}
+    <div class="py-5">
+        <div class="container">
+            <h1 class="display-4 mb-4">Demande de Souscription pour {{ maison.titre }}</h1>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="mb-4">
+                                    <label for="message_locataire" class="form-label">Message pour l'agence</label>
+                                    <textarea class="form-control" id="message_locataire" name="message_locataire" rows="5" required placeholder="Expliquez pourquoi vous êtes intéressé par ce bien..."></textarea>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="documents_fournis" class="form-label">Documents justificatifs</label>
+                                    <input type="file" class="form-control" id="documents_fournis" name="documents_fournis" multiple>
+                                    <small class="form-text text-muted">Formats acceptés : PDF, JPG, PNG</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-paper-plane me-2"></i>Envoyer la demande</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block title %}Connexion - LOCABF{% endblock %}
+{% block content %}
+    <div class="container mt-5">
+        <h2>Connexion</h2>
+        {% if form.errors %}
+            <div class="alert alert-danger">Votre nom d'utilisateur ou mot de passe est incorrect.</div>
+        {% endif %}
+        <form method="post" action="{% url 'token_obtain_pair' %}">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button type="submit" class="btn btn-primary">Se connecter avec JWT</button>
+            <a href="{% url 'password_reset' %}" class="btn btn-link">Mot de passe oublié ?</a>
+            <p>Pas de compte ? <a href="{% url 'register' %}">Inscrivez-vous</a></p>
+        </form>
+    </div>
+{% endblock %}

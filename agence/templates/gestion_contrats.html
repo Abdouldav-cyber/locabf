@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Gestion des Contrats{% endblock %}
+{% block content %}
+    <div class="py-5">
+        <div class="container">
+            <h1 class="display-4 mb-4">Gestion des Contrats</h1>
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Locataire</th>
+                                <th>Maison</th>
+                                <th>Propriétaire</th>
+                                <th>Date Début</th>
+                                <th>Date Fin</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contrat in contrats %}
+                                <tr>
+                                    <td>{{ contrat.locataire.nom_complet }}</td>
+                                    <td>{{ contrat.maison.titre }}</td>
+                                    <td>{{ contrat.proprietaire.nom_complet }}</td>
+                                    <td>{{ contrat.date_debut }}</td>
+                                    <td>{{ contrat.date_fin }}</td>
+                                    <td>{{ contrat.get_statut_display }}</td>
+                                    <td>
+                                        <a href="{% url 'contrat_detail' contrat.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
+                                        <a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                        <a href="#" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Aucun contrat enregistré.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

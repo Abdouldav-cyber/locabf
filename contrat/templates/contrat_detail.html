@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Détails du Contrat{% endblock %}
+{% block content %}
+    <div class="py-5 bg-light">
+        <div class="container">
+            <h1 class="display-4 mb-4">Détails du Contrat #{{ contrat.id }}</h1>
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h5 class="card-title mb-3">Informations générales</h5>
+                            <p><strong>Statut :</strong> {{ contrat.get_statut_display }}</p>
+                            <p><strong>Date de début :</strong> {{ contrat.date_debut }}</p>
+                            <p><strong>Date de fin :</strong> {{ contrat.date_fin }}</p>
+                            <p><strong>Loyer mensuel :</strong> {{ contrat.loyer_mensuel }}€</p>
+                            <p><strong>Charges mensuelles :</strong> {{ contrat.charges_mensuelles }}€</p>
+                            <p><strong>Dépôt de garantie :</strong> {{ contrat.depot_garantie }}€</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="card-title mb-3">Parties impliquées</h5>
+                            <p><strong>Locataire :</strong> {{ contrat.locataire.nom_complet }} (<a href="mailto:{{ contrat.locataire.email }}">{{ contrat.locataire.email }}</a>)</p>
+                            <p><strong>Propriétaire :</strong> {{ contrat.proprietaire.nom_complet }} (<a href="mailto:{{ contrat.proprietaire.email }}">{{ contrat.proprietaire.email }}</a>)</p>
+                            <p><strong>Maison :</strong> <a href="{% url 'maison_detail' contrat.maison.pk %}">{{ contrat.maison.titre }}</a> ({{ contrat.maison.ville }})</p>
+                        </div>
+                        <div class="col-12">
+                            <h5 class="card-title mb-3">Documents et conditions</h5>
+                            {% if contrat.document_contrat %}
+                                <p><strong>Document du contrat :</strong> <a href="{{ contrat.document_contrat.url }}" target="_blank">Télécharger</a></p>
+                            {% else %}
+                                <p><strong>Document du contrat :</strong> Non disponible</p>
+                            {% endif %}
+                            <p><strong>Conditions particulières :</strong> {{ contrat.conditions_particulieres|default:"Aucune" }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'gestion_contrats' %}" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Retour à la liste</a>
+                        {% if user.is_staff %}
+                            <a href="#" class="btn btn-outline-warning"><i class="fas fa-edit me-2"></i>Modifier</a>
+                            <a href="#" class="btn btn-outline-danger"><i class="fas fa-trash me-2"></i>Résilier</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

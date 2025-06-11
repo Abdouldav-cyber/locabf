@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block title %}Connexion - LOCABF{% endblock %}
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h2 class="card-title text-center mb-4"><i class="fas fa-sign-in-alt"></i> Connexion</h2>
+                        {% if form.errors %}
+                            <div class="alert alert-danger text-center" role="alert">
+                                <i class="fas fa-exclamation-triangle"></i> Votre nom d'utilisateur ou mot de passe est incorrect.
+                            </div>
+                        {% endif %}
+                        <form method="post" action="{% url 'token_obtain_pair' %}" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_username" class="form-label"><i class="fas fa-user"></i> Nom d'utilisateur</label>
+                                <input type="text" name="username" id="id_username" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_password" class="form-label"><i class="fas fa-lock"></i> Mot de passe</label>
+                                <input type="password" name="password" id="id_password" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mb-3"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
+                            <div class="text-center">
+                                <a href="{% url 'password_reset' %}" class="btn btn-link"><i class="fas fa-key"></i> Mot de passe oublié ?</a>
+                                <p>Pas de compte ? <a href="{% url 'register' %}" class="link-primary"><i class="fas fa-user-plus"></i> Inscrivez-vous</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+    <script src="{% static 'js/custom.js' %}"></script>
+{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}

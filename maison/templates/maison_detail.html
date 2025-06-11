@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{{ maison.titre }}{% endblock %}
+{% block content %}
+    <div class="py-5 bg-light">
+        <div class="container">
+            <h1 class="display-4 mb-4">{{ maison.titre }}</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <div id="carouselMaison" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for photo in maison.photos.all %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <img src="{{ photo.image.url }}" class="d-block w-100" alt="{{ photo.description }}" style="height: 400px; object-fit: cover;">
+                                </div>
+                            {% empty %}
+                                <div class="carousel-item active">
+                                    <img src="https://via.placeholder.com/600" class="d-block w-100" alt="Placeholder" style="height: 400px; object-fit: cover;">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselMaison" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Précédent</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselMaison" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Suivant</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title">Détails du bien</h5>
+                            <p><strong>Description :</strong> {{ maison.description }}</p>
+                            <p><strong>Adresse :</strong> {{ maison.adresse_complete }}, {{ maison.ville }} {{ maison.code_postal }}</p>
+                            <p><strong>Type :</strong> {{ maison.get_type_bien_display }}</p>
+                            <p><strong>Pièces :</strong> {{ maison.nombre_pieces }}</p>
+                            <p><strong>Surface :</strong> {{ maison.surface }} m²</p>
+                            <p><strong>Loyer :</strong> {{ maison.loyer_mensuel }}€/mois</p>
+                            <p><strong>Charges :</strong> {{ maison.charges }}€/mois</p>
+                            <p><strong>Dépôt de garantie :</strong> {{ maison.depot_garantie }}€</p>
+                            <p><strong>Meublé :</strong> {% if maison.meuble %}Oui{% else %}Non{% endif %}</p>
+                            <p><strong>Statut :</strong> {{ maison.get_statut_display }}</p>
+                            <a href="{% url 'souscription_form' maison.pk %}" class="btn btn-primary w-100 mt-3">Faire une demande de location</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h3>Localisation</h3>
+                <div id="map" style="height: 400px;"></div>
+                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+                <script>
+                    var map = L.map('map').setView([{{ maison.latitude }}, {{ maison.longitude }}], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                    }).addTo(map);
+                    L.marker([{{ maison.latitude }}, {{ maison.longitude }}]).addTo(map)
+                        .bindPopup('{{ maison.titre }}').openPopup();
+                </script>
+            </div>
+        </div>
+    </div>
+{% endblock %}

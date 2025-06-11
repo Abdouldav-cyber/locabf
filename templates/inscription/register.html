@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block title %}Inscription - LOCABF{% endblock %}
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4"><i class="fas fa-user-plus"></i> Inscription</h2>
+                        {% if form.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ form.errors }}
+                            </div>
+                        {% endif %}
+                        <form method="post">
+                            {% csrf_token %}
+                            {% bootstrap_form form layout='floating' %}
+                            <button type="submit" class="btn btn-primary w-100 mt-3"><i class="fas fa-check"></i> S'inscrire</button>
+                            <p class="text-center mt-3">Déjà un compte ? <a href="{% url 'login' %}">Connectez-vous</a></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
