@@ -1,11 +1,9 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ContratViewSet, contrat_detail
+from django.urls import path
+from .views import contrat_detail, ContratListView
 
-router = DefaultRouter()
-router.register(r'contrats', ContratViewSet)
+app_name = 'contrat'
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('detail/<int:pk>/', contrat_detail, name='contrat_detail'),
+    path('', ContratListView.as_view(), name='contrat_list'),
+    path('<int:pk>/', contrat_detail, name='contrat_detail'),
 ]

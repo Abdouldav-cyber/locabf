@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Rapports{% endblock %}
+{% block content %}
+    <div class="py-5 bg-light">
+        <div class="container">
+            <h1 class="display-4 mb-4">Rapports de l'Agence</h1>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-bar fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">Revenus Mensuels</h5>
+                            <p class="card-text display-6">{{ revenus_mensuels|default:"0" }}€</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-pie fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">Taux d'Occupation</h5>
+                            <p class="card-text display-6">{{ taux_occupation|default:"0" }}%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5">
+                <h3>Historique des Contrats</h3>
+                <canvas id="contratsChart" height="100"></canvas>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                    const ctx = document.getElementById('contratsChart').getContext('2d');
+                    const chart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                            datasets: [{
+                                label: 'Contrats Actifs',
+                                data: [10, 15, 12, 18, 20, 22],
+                                backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                                borderColor: 'rgba(0, 123, 255, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+{% endblock %}

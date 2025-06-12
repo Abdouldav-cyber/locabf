@@ -1,11 +1,11 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import AgenceViewSet, dashboard
+from django.urls import path
+from . import views
 
-router = DefaultRouter()
-router.register(r'agences', AgenceViewSet)
+app_name = 'agence'
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('dashboard/', dashboard, name='dashboard'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('gestion-biens/', views.GestionBiensView.as_view(), name='gestion_biens'),
+    path('gestion-contrats/', views.GestionContratsView.as_view(), name='gestion_contrats'),
+    path('rapports/', views.RapportsView.as_view(), name='rapports'),
 ]

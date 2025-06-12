@@ -5,7 +5,7 @@ from proprietaire.models import Proprietaire
 from souscription.models import Souscription
 
 class Contrat(models.Model):
-    STATUT_CHOICES = [
+    STATUS_CHOICES = [
         ('actif', 'Actif'),
         ('resilie', 'Résilié'),
         ('termine', 'Terminé'),
@@ -21,7 +21,7 @@ class Contrat(models.Model):
     loyer_mensuel = models.DecimalField(max_digits=10, decimal_places=2)
     charges_mensuelles = models.DecimalField(max_digits=10, decimal_places=2)
     depot_garantie = models.DecimalField(max_digits=10, decimal_places=2)
-    statut = models.CharField(max_length=50, choices=STATUT_CHOICES, default='actif')
+    statut = models.CharField(max_length=50, choices=STATUS_CHOICES, default='actif')
     date_signature = models.DateTimeField(auto_now_add=True)
     document_contrat = models.FileField(upload_to='contrats/', blank=True, null=True)
     conditions_particulieres = models.TextField(blank=True)

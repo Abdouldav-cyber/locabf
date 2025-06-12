@@ -1,15 +1,7 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Locataire
-from .serializers import LocataireSerializer
 from maison.models import Maison
-
-class LocataireViewSet(viewsets.ModelViewSet):
-    queryset = Locataire.objects.all()
-    serializer_class = LocataireSerializer
-    permission_classes = [IsAuthenticated]
 
 @login_required
 def recherche_maisons(request):

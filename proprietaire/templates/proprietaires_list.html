@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+
+{% block title %}Liste des Propriétaires - LOCABF{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4"><i class="fas fa-user-tie"></i> Liste des Propriétaires</h1>
+        
+        {% if proprietaire %}
+            <div class="row">
+                {% for proprietaire in proprietaires %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ proprietaire.nom }}</h5>
+                                <p class="card-text">Email: {{ proprietaire.email }}</p>
+                                <a href="{% url 'api:proprietaires-detail' proprietaire.pk %}" class="btn btn-primary"><i class="fas fa-eye"></i> Détails</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-center">Aucun propriétaire trouvé.</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center">Vous devez être connecté pour voir cette liste.</p>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}

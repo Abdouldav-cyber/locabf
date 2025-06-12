@@ -1,11 +1,7 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ProprietaireViewSet, proprietaire_profil
-
-router = DefaultRouter()
-router.register(r'proprietaires', ProprietaireViewSet)
-
+from django.urls import path
+from .views import ProprietairesListView, proprietaire_profil
+app_name = 'proprietaire'
 urlpatterns = [
-    path('', include(router.urls)),
+    path('liste/', ProprietairesListView.as_view(), name='proprietaires_list'),
     path('profil/', proprietaire_profil, name='proprietaire_profil'),
 ]

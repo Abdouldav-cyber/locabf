@@ -1,16 +1,10 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Agence
-from .serializers import AgenceSerializer
 from maison.models import Maison
 from contrat.models import Contrat
-
-class AgenceViewSet(viewsets.ModelViewSet):
-    queryset = Agence.objects.all()
-    serializer_class = AgenceSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
 
 @login_required
 def dashboard(request):
@@ -24,3 +18,12 @@ def dashboard(request):
         'contrats_count': contrats_count,
         'taux_occupation': round(taux_occupation, 2)
     })
+
+class GestionBiensView(LoginRequiredMixin, TemplateView):
+    template_name = 'agence/gestion_biens.html'
+
+class GestionContratsView(LoginRequiredMixin, TemplateView):
+    template_name = 'agence/gestion_contrats.html'
+
+class RapportsView(LoginRequiredMixin, TemplateView):
+    template_name = 'agence/rapports.html'

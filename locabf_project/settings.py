@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_bootstrap5',
+    'django_extensions',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_yasg',
@@ -24,17 +25,11 @@ INSTALLED_APPS = [
     'locataire',
     'souscription',
     'contrat',
-    'allauth',
-    'allauth.account',
 ]
 
 MIDDLEWARE = [
-    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

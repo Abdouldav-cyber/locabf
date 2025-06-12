@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+    <div class="bg-light py-5">
+        <div class="container">
+            <h1 class="display-4 text-center mb-4">Tableau de bord de l'Agence</h1>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <i class="fas fa-building fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">Biens enregistrés</h5>
+                            <p class="card-text display-6">{{ maisons_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <i class="fas fa-file-contract fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">Contrats actifs</h5>
+                            <p class="card-text display-6">{{ contrats_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-pie fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">Taux d'occupation</h5>
+                            <p class="card-text display-6">{{ taux_occupation }}%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if agences %}
+                <h3 class="mt-5">Liste des Agences</h3>
+                <div class="row g-4">
+                    {% for agence in agences %}
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ agence.nom }}</h5>
+                                    <p><strong>Adresse:</strong> {{ agence.adresse }}</p>
+                                    <p><strong>Téléphone:</strong> {{ agence.telephone }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-center mt-4">Aucune agence disponible.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block content %}
+    <div class="container mt-5">
+        <h2>Souscription #{{ souscription.id }}</h2>
+        <div class="card">
+            <div class="card-body">
+                <p><strong>Locataire:</strong> {{ souscription.locataire }}</p>
+                <p><strong>Maison:</strong> {{ souscription.maison }}</p>
+                <p><strong>Statut:</strong> {{ souscription.get_statut_display }}</p>
+                <p><strong>Date de demande:</strong> {{ souscription.date_demande|date:"d/m/Y H:i" }}</p>
+                {% if souscription.date_reponse %}
+                    <p><strong>Date de réponse:</strong> {{ souscription.date_reponse|date:"d/m/Y H:i" }}</p>
+                {% endif %}
+                {% if souscription.message_locataire %}
+                    <p><strong>Message du locataire:</strong> {{ souscription.message_locataire }}</p>
+                {% endif %}
+                {% if souscription.commentaire_agence %}
+                    <p><strong>Commentaire de l'agence:</strong> {{ souscription.commentaire_agence }}</p>
+                {% endif %}
+                {% if souscription.documents_fournis.files %}
+                    <p><strong>Documents fournis:</strong></p>
+                    <ul>
+                        {% for doc in souscription.documents_fournis.files %}
+                            <li>{{ doc }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <a href="{% url 'souscription:souscription_list' %}" class="btn btn-secondary">Retour</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

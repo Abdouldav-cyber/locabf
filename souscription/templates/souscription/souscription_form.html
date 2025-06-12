@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block content %}
+    <div class="container mt-5">
+        <h2>Souscription pour {{ maison }}</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <!-- Ajout de l'attribut multiple au champ de fichier -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const fileInput = document.querySelector('input[name="documents_fournis"]');
+                    if (fileInput) {
+                        fileInput.setAttribute('multiple', 'multiple');
+                    }
+                });
+            </script>
+            <button type="submit" class="btn btn-primary">Soumettre</button>
+            <a href="{% url 'locataire:recherche_maisons' %}" class="btn btn-secondary shadow-sm">Annuler</a>
+        </form>
+    </div>
+{% endblock %}
