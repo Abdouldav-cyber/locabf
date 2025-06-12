@@ -1,4 +1,7 @@
 from rest_framework import serializers
+
+from locataire.models import Locataire
+from maison.models import Maison
 from .models import Souscription
 from locataire.serializers import LocataireSerializer
 from maison.serializers import MaisonSerializer

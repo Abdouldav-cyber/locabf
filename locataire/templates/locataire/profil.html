@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Profil Locataire{% endblock %}
+{% block content %}
+    <div class="py-5 bg-light">
+        <div class="container">
+            <h1 class="display-4 mb-4">Profil Locataire</h1>
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title">{{ locataire.nom_complet }}</h5>
+                    <p><strong>Email :</strong> {{ locataire.email }}</p>
+                    <p><strong>Téléphone :</strong> {{ locataire.telephone }}</p>
+                    <p><strong>Date de naissance :</strong> {{ locataire.date_naissance }}</p>
+                    <p><strong>Profession :</strong> {{ locataire.profession }}</p>
+                    <p><strong>Revenus mensuels :</strong> {{ locataire.revenus_mensuels }}€</p>
+                    <p><strong>Adresse actuelle :</strong> {{ locataire.adresse_actuelle }}</p>
+                    <p><strong>Date d'inscription :</strong> {{ locataire.date_inscription }}</p>
+                    <p><strong>Statut :</strong> {% if locataire.statut_actif %}Actif{% else %}Inactif{% endif %}</p>
+                    <a href="{% url 'recherche_maisons' %}" class="btn btn-primary mt-3">Rechercher des biens</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

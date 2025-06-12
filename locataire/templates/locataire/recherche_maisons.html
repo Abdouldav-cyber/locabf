@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block title %}Recherche de Maisons{% endblock %}
+{% block content %}
+    <div class="py-5 bg-light">
+        <div class="container">
+            <h1 class="display-4 mb-4">Rechercher une Maison</h1>
+            <div class="card shadow-sm border-0 mb-5">
+                <div class="card-body">
+                    <form method="get" action="{% url 'locataire:recherche_maisons' %}">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="ville" class="form-label">Ville</label>
+                                <input type="text" class="form-control" id="ville" name="ville" value="{{ request.GET.ville }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="type_bien" class="form-label">Type de bien</label>
+                                <select class="form-select" id="type_bien" name="type_bien">
+                                    <option value="">Tous</option>
+                                    <option value="appartement" {% if request.GET.type_bien == 'appartement' %}selected{% endif %}>Appartement</option>
+                                    <option value="maison" {% if request.GET.type_bien == 'maison' %}selected{% endif %}>Maison</option>
+                                    <option value="studio" {% if request.GET.type_bien == 'studio' %}selected{% endif %}>Studio</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="loyer_max" class="form-label">Loyer maximum (€)</label>
+                                <input type="number" class="form-control" id="loyer_max" name="loyer_max" value="{{ request.GET.loyer_max }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="nombre_pieces" class="form-label">Nombre de pièces</label>
+                                <input type="number" class="form-control" id="nombre_pieces" name="nombre_pieces" value="{{ request.GET.nombre_pieces }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="meuble" class="form-label">Meublé</label>
+                                <select class="form-select" id="meuble" name="meuble">
+                                    <option value="">Tous</option>
+                                    <option value="true" {% if request.GET.meuble == 'true' %}selected{% endif %}>Oui</option>
+                                    <option value="false" {% if request.GET.meuble == 'false' %}selected{% endif %}>Non</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 text-end">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-search me-2"></i>Rechercher</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <h3>Résultats de la recherche</h3>
+            <div class="row g-4">
+                {% for maison in maisons %}
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            {% if maison.photos.exists %}
+                                <img src="{{ maison.photos.first.image.url }}" class="card-img-top" alt="{{ maison.titre }}">
+                            {% else %}
+                                <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="Placeholder">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ maison.titre }}</h5>
+                                <p class="card-text">
+                                    <i class="fas fa-map-marker-alt me-2"></i>{{ maison.ville }}<br>
+                                    <i class="fas fa-home me-2"></i>{{ maison.get_type_bien_display }} - {{ maison.nombre_pieces }} pièces<br>
+                                    <i class="fas fa-euro-sign me-2"></i>{{ maison.loyer_mensuel }}€/mois
+                                </p>
+                                <a href="{% url 'maison:maison_detail' maison.pk %}" class="btn btn-primary w-100">Voir les détails</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <p class="text-center text-muted">Aucun logement ne correspond à vos critères.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

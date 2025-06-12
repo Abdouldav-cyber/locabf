@@ -33,24 +33,6 @@
                     </div>
                 </div>
             </div>
-            {% if agences %}
-                <h3 class="mt-5">Liste des Agences</h3>
-                <div class="row g-4">
-                    {% for agence in agences %}
-                        <div class="col-md-6">
-                            <div class="card shadow-sm border-0">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ agence.nom }}</h5>
-                                    <p><strong>Adresse:</strong> {{ agence.adresse }}</p>
-                                    <p><strong>Téléphone:</strong> {{ agence.telephone }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="text-center mt-4">Aucune agence disponible.</p>
-            {% endif %}
         </div>
     </div>
 {% endblock %}
