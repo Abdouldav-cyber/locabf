@@ -31,7 +31,7 @@
                                     <td>{{ maison.loyer_mensuel }}€</td>
                                     <td>{{ maison.get_statut_display }}</td>
                                     <td>
-                                        <a href="{% url 'maison:maison_detail' maison.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
+                                        <a href="{% url 'maison_detail' maison.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
                                         <a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
                                         <a href="#" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
                                     </td>

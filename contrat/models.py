@@ -3,6 +3,7 @@ from maison.models import Maison
 from locataire.models import Locataire
 from proprietaire.models import Proprietaire
 from souscription.models import Souscription
+from agence.models import Agence
 
 class Contrat(models.Model):
     STATUS_CHOICES = [
@@ -16,6 +17,7 @@ class Contrat(models.Model):
     locataire = models.ForeignKey(Locataire, on_delete=models.CASCADE)
     proprietaire = models.ForeignKey(Proprietaire, on_delete=models.CASCADE)
     souscription = models.ForeignKey(Souscription, on_delete=models.CASCADE)
+    agence = models.ForeignKey(Agence, on_delete=models.CASCADE, related_name='contrats', null=True, blank=True)
     date_debut = models.DateField()
     date_fin = models.DateField()
     loyer_mensuel = models.DecimalField(max_digits=10, decimal_places=2)

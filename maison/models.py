@@ -1,5 +1,6 @@
 from django.db import models
 from proprietaire.models import Proprietaire
+from agence.models import Agence
 
 class Maison(models.Model):
     STATUT_CHOICES = [
@@ -15,6 +16,7 @@ class Maison(models.Model):
     ]
 
     proprietaire = models.ForeignKey(Proprietaire, on_delete=models.CASCADE)
+    agence = models.ForeignKey(Agence, on_delete=models.CASCADE, related_name='maisons', null=True, blank=True)
     titre = models.CharField(max_length=255)
     description = models.TextField()
     adresse_complete = models.TextField()

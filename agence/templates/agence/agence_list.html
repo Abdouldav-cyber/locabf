@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block content %}
+    <div class="container mt-5">
+        <h1>Liste des Agences</h1>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% if agences %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agence in agences %}
+                        <tr>
+                            <td>{{ agence.nom }}</td>
+                            <td>{{ agence.email }}</td>
+                            <td>
+                                <a href="{% url 'agence:agence_update' agence_id=agence.id %}" class="btn btn-warning btn-sm">Modifier</a>
+                                <a href="{% url 'agence:agence_delete' agence_id=agence.id %}" class="btn btn-danger btn-sm">Supprimer</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3">Aucune agence trouvée.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Aucune agence trouvée.</p>
+            <a href="{% url 'agence:agence_create' %}" class="btn btn-primary">Créer une agence</a>
+        {% endif %}
+    </div>
+{% endblock %}
