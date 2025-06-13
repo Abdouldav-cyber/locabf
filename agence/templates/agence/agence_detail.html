@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block title %}Détails de l'Agence - {{ agence.nom }}{% endblock %}
+{% block content %}
+    <div class="container my-5">
+        <h1 class="text-center mb-4"><i class="fas fa-building"></i> Détails de l'Agence : {{ agence.nom }}</h1>
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                Informations de l'Agence
+            </div>
+            <div class="card-body">
+                <p class="card-text"><strong>Adresse :</strong> {{ agence.adresse }}</p>
+                <p class="card-text"><strong>Email :</strong> {{ agence.email }}</p>
+                <p class="card-text"><strong>Téléphone :</strong> {{ agence.telephone }}</p>
+                <p class="card-text"><strong>SIRET :</strong> {{ agence.siret }}</p>
+                {% if agence.logo %}
+                    <p class="card-text"><strong>Logo :</strong> <img src="{{ agence.logo.url }}" alt="Logo" class="img-fluid" style="max-width: 200px;"></p>
+                {% endif %}
+                <h5 class="mt-4">Employés :</h5>
+                <ul class="list-group">
+                    {% for employe in agence.employes.all %}
+                        <li class="list-group-item">{{ employe.username }} ({{ employe.email }})</li>
+                    {% empty %}
+                        <li class="list-group-item">Aucun employé associé.</li>
+                    {% endfor %}
+                </ul>
+                <div class="mt-4 text-center">
+                    <a href="{% url 'agence:agence_update' agence.id %}" class="btn btn-warning me-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{% url 'agence:agence_delete' agence.id %}" class="btn btn-danger me-2">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                    <a href="{% url 'agence:ajouter_employe' agence.id %}" class="btn btn-success me-2">
+                        <i class="fas fa-user-plus"></i> Ajouter un employé
+                    </a>
+                    <a href="{% url 'agence:agence_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

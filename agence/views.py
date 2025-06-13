@@ -7,18 +7,56 @@ from django.http import HttpResponseForbidden
 from .models import Agence
 from maison.models import Maison
 from contrat.models import Contrat
-from .permissions import agence_required
+from .forms import AgenceForm, EmployeForm
 from django.contrib.auth.models import User
 
-@login_required
-@agence_required
-def dashboard(request, agence):
-    agences = Agence.objects.filter(id=agence.id)  # Restreint à l'agence de l'utilisateur
+# Permissions
+def agence_permission(agence_id=None):
+    def decorator(view_func):
+        @login_required
+        def wrapper(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return HttpResponseForbidden("Vous devez être connecté.")
+            if request.user.is_superuser:
+                kwargs['agence'] = Agence.objects.first()  # Superuser gets first agency or None
+                return view_func(request, *args, **kwargs)
+            try:
+                if agence_id and isinstance(agence_id, str):
+                    agence = get_object_or_404(Agence, id=kwargs.get(agence_id), employes=request.user)
+                else:
+                    agence = request.user.agences.first()
+                if not agence:
+                    return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+                kwargs['agence'] = agence
+                return view_func(request, *args, **kwargs)
+            except Agence.DoesNotExist:
+                return HttpResponseForbidden("Vous n'êtes pas associé à cette agence.")
+        return wrapper
+    return decorator
+
+def agence_required(view_func):
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden("Vous devez être connecté.")
+        agence_id = kwargs.get('agence_id')
+        if agence_id:
+            agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
+        else:
+            agence = request.user.agences.first()
+        if not agence:
+            return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+        kwargs['agence'] = agence
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+# Views
+@agence_permission()
+def dashboard(request, agence=None):
     maisons_count = Maison.objects.filter(agence=agence).count()
     contrats_count = Contrat.objects.filter(agence=agence, statut='actif').count()
     taux_occupation = (contrats_count / maisons_count * 100) if maisons_count > 0 else 0
     return render(request, 'agence/dashboard.html', {
-        'agences': agences,
+        'agence': agence,
         'maisons_count': maisons_count,
         'contrats_count': contrats_count,
         'taux_occupation': round(taux_occupation, 2)
@@ -33,6 +71,7 @@ class GestionBiensView(LoginRequiredMixin, TemplateView):
         if not agence:
             return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
         context['maisons'] = Maison.objects.filter(agence=agence)
+        context['agence'] = agence
         return context
 
 class GestionContratsView(LoginRequiredMixin, TemplateView):
@@ -44,6 +83,7 @@ class GestionContratsView(LoginRequiredMixin, TemplateView):
         if not agence:
             return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
         context['contrats'] = Contrat.objects.filter(agence=agence)
+        context['agence'] = agence
         return context
 
 class RapportsView(LoginRequiredMixin, TemplateView):
@@ -57,84 +97,82 @@ class RapportsView(LoginRequiredMixin, TemplateView):
         context['maisons_count'] = Maison.objects.filter(agence=agence).count()
         context['contrats_count'] = Contrat.objects.filter(agence=agence, statut='actif').count()
         context['taux_occupation'] = (context['contrats_count'] / context['maisons_count'] * 100) if context['maisons_count'] > 0 else 0
+        context['agence'] = agence
         return context
 
-@login_required
-@agence_required
-def agence_list(request, agence):
-    agences = Agence.objects.filter(id=agence.id)  # Restreint à l'agence de l'utilisateur
-    return render(request, 'agence/agence_list.html', {'agences': agences})
+@agence_permission()
+def agence_list(request, agence=None):
+    if request.user.is_superuser:
+        agences = Agence.objects.all()  # Superusers see all agencies
+    else:
+        agences = request.user.agences.all()  # Regular users see their agencies
+    return render(request, 'agence/agence_list.html', {'agences': agences, 'agence': agence})
 
-@login_required
-def agence_create(request):
+@agence_permission()
+def agence_create(request, agence=None):
     if request.method == 'POST':
-        nom = request.POST['nom']
-        adresse = request.POST['adresse']
-        email = request.POST['email']
-        telephone = request.POST['telephone']
-        siret = request.POST['siret']
-        logo = request.FILES.get('logo')
+        form = AgenceForm(request.POST, request.FILES)
+        if form.is_valid():
+            agence = form.save(commit=False)
+            agence.employes.add(request.user)
+            agence.save()
+            messages.success(request, "Agence créée avec succès.")
+            return redirect('agence:agence_list')
+        else:
+            messages.error(request, "Erreur dans le formulaire.")
+    else:
+        form = AgenceForm()
+    return render(request, 'agence/agence_create.html', {'form': form})
 
-        # Vérification de l'unicité de l'email
-        if Agence.objects.filter(email=email).exists():
-            messages.error(request, "Cet email est déjà utilisé par une autre agence.")
-            return render(request, 'agence/agence_create.html')
-
-        agence = Agence(nom=nom, adresse=adresse, email=email, telephone=telephone, siret=siret, logo=logo)
-        agence.save()
-        agence.employes.add(request.user)
-        messages.success(request, "Agence créée avec succès.")
-        return redirect('agence:agence_list')
-    return render(request, 'agence/agence_create.html')
-
-@login_required
-@agence_required
-def agence_update(request, agence_id, agence):
-    agence_obj = get_object_or_404(Agence, id=agence_id)
-    if agence_obj != agence:
-        return HttpResponseForbidden("Vous n'avez pas la permission de modifier cette agence.")
+@agence_permission(agence_id='agence_id')
+def agence_update(request, agence_id, agence=None):
+    if not agence:
+        agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
     if request.method == 'POST':
-        agence_obj.nom = request.POST['nom']
-        agence_obj.adresse = request.POST['adresse']
-        agence_obj.email = request.POST['email']
-        agence_obj.telephone = request.POST['telephone']
-        agence_obj.siret = request.POST['siret']
-        if 'logo' in request.FILES:
-            agence_obj.logo = request.FILES['logo']
-        # Vérification de l'unicité de l'email (sauf si inchangé)
-        if agence_obj.email != request.POST['email'] and Agence.objects.filter(email=request.POST['email']).exclude(id=agence_id).exists():
-            messages.error(request, "Cet email est déjà utilisé par une autre agence.")
-            return render(request, 'agence/agence_update.html', {'agence': agence_obj})
-        agence_obj.save()
-        messages.success(request, "Agence mise à jour avec succès.")
-        return redirect('agence:agence_list')
-    return render(request, 'agence/agence_update.html', {'agence': agence_obj})
+        form = AgenceForm(request.POST, request.FILES, instance=agence)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Agence mise à jour avec succès.")
+            return redirect('agence:agence_list')
+        else:
+            messages.error(request, "Erreur dans le formulaire.")
+    else:
+        form = AgenceForm(instance=agence)
+    return render(request, 'agence/agence_update.html', {'form': form, 'agence': agence})
 
-@login_required
-@agence_required
-def agence_delete(request, agence_id, agence):
-    agence_obj = get_object_or_404(Agence, id=agence_id)
-    if agence_obj != agence:
-        return HttpResponseForbidden("Vous n'avez pas la permission de supprimer cette agence.")
+@agence_permission(agence_id='agence_id')
+def agence_delete(request, agence_id, agence=None):
+    if not agence:
+        agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
     if request.method == 'POST':
-        agence_obj.delete()
+        agence.delete()
         messages.success(request, "Agence supprimée avec succès.")
-        return redirect('home')
-    return render(request, 'agence/agence_delete.html', {'agence': agence_obj})
-
-@login_required
-@agence_required
-def ajouter_employe(request, agence_id, agence):
-    agence_obj = get_object_or_404(Agence, id=agence_id)
-    if agence_obj != agence:
-        return HttpResponseForbidden("Vous n'avez pas la permission d'ajouter un employé à cette agence.")
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        user = get_object_or_404(User, email=email)
-        agence_obj.employes.add(user)
-        messages.success(request, "Employé ajouté avec succès.")
         return redirect('agence:agence_list')
-    return render(request, 'agence/ajouter_employe.html', {'agence': agence_obj})
+    return render(request, 'agence/agence_delete.html', {'agence': agence})
+
+@agence_permission(agence_id='agence_id')
+def agence_detail(request, agence_id, agence=None):
+    if not agence:
+        agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
+    return render(request, 'agence/agence_detail.html', {'agence': agence})
+
+@agence_permission(agence_id='agence_id')
+def ajouter_employe(request, agence_id, agence=None):
+    if not agence:
+        agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
+    if request.method == 'POST':
+        form = EmployeForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            user = get_object_or_404(User, email=email)
+            agence.employes.add(user)
+            messages.success(request, "Employé ajouté avec succès.")
+            return redirect('agence:agence_list')
+        else:
+            messages.error(request, "Erreur dans le formulaire.")
+    else:
+        form = EmployeForm()
+    return render(request, 'agence/ajouter_employe.html', {'form': form, 'agence': agence})
 
 @login_required
 def ajouter_employe_default(request):

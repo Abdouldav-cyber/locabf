@@ -1,40 +1,32 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
+{% block title %}Créer une Agence{% endblock %}
 {% block content %}
-    <div class="container mt-5">
-        <h1>Créer une Agence</h1>
+    <div class="container my-5">
+        <h1 class="text-center mb-4"><i class="fas fa-building"></i> Créer une Agence</h1>
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             {% endfor %}
         {% endif %}
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="nom">Nom :</label>
-                <input type="text" name="nom" class="form-control" required>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% bootstrap_form form layout='horizontal' %}
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                        <a href="{% url 'agence:agence_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Annuler
+                        </a>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="adresse">Adresse :</label>
-                <textarea name="adresse" class="form-control" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="email">Email :</label>
-                <input type="email" name="email" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="telephone">Téléphone :</label>
-                <input type="text" name="telephone" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="siret">SIRET :</label>
-                <input type="text" name="siret" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="logo">Logo :</label>
-                <input type="file" name="logo" class="form-control-file">
-            </div>
-            <button type="submit" class="btn btn-primary mt-2">Créer</button>
-        </form>
+        </div>
     </div>
 {% endblock %}

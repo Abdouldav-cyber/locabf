@@ -1,13 +1,26 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
+{% block title %}Supprimer l'Agence - {{ agence.nom }}{% endblock %}
 {% block content %}
-    <div class="container mt-5">
-        <h1>Supprimer l'Agence</h1>
-        <p>Êtes-vous sûr de vouloir supprimer l'agence "{{ agence.nom }}" ? Cette action est irréversible.</p>
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
-            <a href="{% url 'agence:agence_list' agence_id=agence.id %}" class="btn btn-secondary">Annuler</a>
-        </form>
+    <div class="container my-5">
+        <h1 class="text-center mb-4"><i class="fas fa-building"></i> Supprimer l'Agence : {{ agence.nom }}</h1>
+        <div class="alert alert-danger" role="alert">
+            Êtes-vous sûr de vouloir supprimer cette agence ? Cette action est irréversible !
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Confirmer la suppression
+                        </button>
+                        <a href="{% url 'agence:agence_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 {% endblock %}
