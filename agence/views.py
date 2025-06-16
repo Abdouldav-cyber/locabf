@@ -15,14 +15,16 @@ def agence_permission(agence_id_param=None):
     def decorator(view_func):
         def wrapper(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                return HttpResponseForbidden("Vous devez être connecté.")
+                messages.error(request, "Vous devez être connecté pour accéder à cette page.")
+                return redirect('login')
             
-            if request.user.is_superuser:
+            # Si l'utilisateur est superuser ou admin, il a accès à tout sans restriction d'agence
+            if request.user.is_superuser or (request.user.role and request.user.role == 'admin'):
                 if agence_id_param:
                     agence_id = kwargs.get(agence_id_param)
-                    agence = get_object_or_404(Agence, id=agence_id)
+                    agence = get_object_or_404(Agence, id=agence_id) if agence_id else Agence.objects.first()
                 else:
-                    agence = Agence.objects.first()
+                    agence = None  # Pas de restriction d'agence pour admin/superuser
             else:
                 if agence_id_param:
                     agence_id = kwargs.get(agence_id_param)
@@ -30,8 +32,9 @@ def agence_permission(agence_id_param=None):
                 else:
                     agence = request.user.agences.first()
             
-            if not agence:
-                return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+            if not agence and not (request.user.is_superuser or (request.user.role and request.user.role == 'admin')):
+                messages.error(request, "Vous n'êtes pas associé à une agence ou aucune agence n'est disponible.")
+                return redirect('home')
             
             kwargs['agence'] = agence
             return view_func(request, *args, **kwargs)
@@ -42,9 +45,9 @@ def agence_permission(agence_id_param=None):
 def role_required(roles):
     def decorator(view_func):
         def _wrapped_view(request, *args, **kwargs):
-            if not request.user.is_authenticated or (request.user.role and request.user.role not in roles):
-                messages.error(request, "Vous n'avez pas les permissions nécessaires.")
-                return redirect('login')
+            if not request.user.is_authenticated or (request.user.role and request.user.role not in roles and not request.user.is_superuser):
+                messages.error(request, "Vous n'avez pas les permissions nécessaires pour accéder à cette page.")
+                return redirect('home')
             return view_func(request, *args, **kwargs)
         return _wrapped_view
     return decorator
@@ -57,16 +60,23 @@ class HomeView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         agence = self.request.user.agences.first()
-        if self.request.user.is_superuser and not agence:
-            agence = Agence.objects.first()
+        if self.request.user.is_superuser or (request.user.role and request.user.role == 'admin'):
+            agence = None  # Pas de restriction d'agence pour admin/superuser
+        else:
+            if not agence:
+                agence = Agence.objects.first() if self.request.user.is_superuser else None
         context['agence'] = agence
         return context
 
 @agence_permission()
 @role_required(['admin', 'employe'])
 def dashboard(request, agence=None):
-    maisons_count = Maison.objects.filter(agence=agence).count()
-    contrats_count = Contrat.objects.filter(agence=agence, statut='actif').count()
+    if request.user.is_superuser or (request.user.role and request.user.role == 'admin'):
+        maisons_count = Maison.objects.count()
+        contrats_count = Contrat.objects.filter(statut='actif').count()
+    else:
+        maisons_count = Maison.objects.filter(agence=agence).count()
+        contrats_count = Contrat.objects.filter(agence=agence, statut='actif').count()
     taux_occupation = (contrats_count / maisons_count * 100) if maisons_count > 0 else 0
     return render(request, 'agence/dashboard.html', {
         'agence': agence,
@@ -80,13 +90,15 @@ class GestionBiensView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        agence = self.request.user.agences.first()
-        if not agence and not self.request.user.is_superuser:
-            return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
-        if self.request.user.is_superuser:
-            agence = Agence.objects.first()
-        context['maisons'] = Maison.objects.filter(agence=agence)
-        context['agence'] = agence
+        if request.user.is_superuser or (request.user.role and request.user.role == 'admin'):
+            context['maisons'] = Maison.objects.all()
+            context['agence'] = None
+        else:
+            agence = self.request.user.agences.first()
+            if not agence:
+                return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+            context['maisons'] = Maison.objects.filter(agence=agence)
+            context['agence'] = agence
         return context
 
 class GestionContratsView(LoginRequiredMixin, TemplateView):
@@ -94,13 +106,15 @@ class GestionContratsView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        agence = self.request.user.agences.first()
-        if not agence and not self.request.user.is_superuser:
-            return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
-        if self.request.user.is_superuser:
-            agence = Agence.objects.first()
-        context['contrats'] = Contrat.objects.filter(agence=agence)
-        context['agence'] = agence
+        if request.user.is_superuser or (request.user.role and request.user.role == 'admin'):
+            context['contrats'] = Contrat.objects.all()
+            context['agence'] = None
+        else:
+            agence = self.request.user.agences.first()
+            if not agence:
+                return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+            context['contrats'] = Contrat.objects.filter(agence=agence)
+            context['agence'] = agence
         return context
 
 class RapportsView(LoginRequiredMixin, TemplateView):
@@ -108,21 +122,23 @@ class RapportsView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        agence = self.request.user.agences.first()
-        if not agence and not self.request.user.is_superuser:
-            return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
-        if self.request.user.is_superuser:
-            agence = Agence.objects.first()
-        context['maisons_count'] = Maison.objects.filter(agence=agence).count()
-        context['contrats_count'] = Contrat.objects.filter(agence=agence, statut='actif').count()
+        if request.user.is_superuser or (request.user.role and request.user.role == 'admin'):
+            context['maisons_count'] = Maison.objects.count()
+            context['contrats_count'] = Contrat.objects.filter(statut='actif').count()
+        else:
+            agence = self.request.user.agences.first()
+            if not agence:
+                return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+            context['maisons_count'] = Maison.objects.filter(agence=agence).count()
+            context['contrats_count'] = Contrat.objects.filter(agence=agence, statut='actif').count()
         context['taux_occupation'] = (context['contrats_count'] / context['maisons_count'] * 100) if context['maisons_count'] > 0 else 0
-        context['agence'] = agence
+        context['agence'] = None if (request.user.is_superuser or (request.user.role and request.user.role == 'admin')) else agence
         return context
 
 @agence_permission()
 @role_required(['admin', 'employe'])
 def agence_list(request, agence=None):
-    if request.user.is_superuser:
+    if request.user.is_superuser or (request.user.role and request.user.role == 'admin'):
         agences = Agence.objects.all()
     else:
         agences = request.user.agences.all()
@@ -136,7 +152,8 @@ def agence_create(request, agence=None):
         if form.is_valid():
             agence = form.save(commit=False)
             agence.save()
-            agence.users.add(request.user)
+            if not request.user.is_superuser and request.user.role != 'admin':
+                agence.users.add(request.user)
             messages.success(request, "Agence créée avec succès.")
             return redirect('agence:agence_list')
         else:
@@ -199,9 +216,11 @@ def ajouter_employe(request, agence_id, agence=None):
 
 @login_required
 def ajouter_employe_default(request):
-    agence = request.user.agences.first()
-    if not agence and not request.user.is_superuser:
-        return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
-    if request.user.is_superuser:
+    if request.user.is_superuser or (request.user.role and request.user.role == 'admin'):
         agence = Agence.objects.first()
+    else:
+        agence = request.user.agences.first()
+    if not agence:
+        messages.error(request, "Vous n'êtes pas associé à une agence.")
+        return redirect('home')
     return redirect('agence:ajouter_employe', agence_id=agence.id)

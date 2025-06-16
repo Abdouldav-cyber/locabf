@@ -8,4 +8,6 @@ urlpatterns = [
     path('creer/<int:agence_id>/', proprietaire_create, name='proprietaire_create'),
     path('modifier/<int:proprietaire_id>/<int:agence_id>/', proprietaire_update, name='proprietaire_update'),
     path('supprimer/<int:proprietaire_id>/<int:agence_id>/', proprietaire_delete, name='proprietaire_delete'),
+    # Ajout d'une route sans agence_id pour superuser/admin (optionnel)
+    path('creer/', proprietaire_create, name='proprietaire_create_global'),
 ]
