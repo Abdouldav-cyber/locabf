@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block title %}Supprimer un Propriétaire{% endblock %}
+{% block content %}
+    <div class="container my-5">
+        <h1 class="text-center mb-4"><i class="fas fa-user-tie"></i> Supprimer un Propriétaire</h1>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p>Êtes-vous sûr de vouloir supprimer le propriétaire "{{ proprietaire.nom_complet }}" ? Cette action est irréversible.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Confirmer la suppression
+                        </button>
+                        <a href="{% url 'proprietaire:proprietaires_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

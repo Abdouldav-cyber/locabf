@@ -1,119 +1,35 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
 {% load static %}
-{% block title %}BIENVENUE SUR LOCABF UNE PLATEFORME DE GESTION IMMOBILIERE{% endblock %}
+{% block title %}Bienvenue sur LOCABF - Choisissez votre rôle{% endblock %}
 {% block content %}
     <div class="dashboard-container py-5">
         <h1 class="text-center mb-5">
             <i class="fas fa-tachometer-alt me-2"></i> BIENVENUE SUR LOCABF UNE PLATEFORME DE GESTION IMMOBILIERE
         </h1>
-        <!-- Entity Cards -->
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            <div class="col">
-                <div class="card h-100 shadow-sm entity-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-building me-2"></i> Agences</h5>
-                        <p class="card-text">Gérez les agences immobilières.</p>
-                        <div class="btn-group">
-                            <a href="{% url 'agence:agence_list' %}" class="btn btn-primary entity-btn">
-                                <i class="fas fa-eye me-2"></i> Voir la liste
-                            </a>
-                            <a href="{% url 'agence:agence_create' %}" class="btn btn-success entity-btn">
-                                <i class="fas fa-plus me-2"></i> Ajouter
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <form method="post" class="text-center">
+            {% csrf_token %}
+            <div class="mb-3">
+                <select name="role" class="form-select" required>
+                    <option value="">Sélectionnez votre rôle</option>
+                    {% for role_value, role_name in roles %}
+                        <option value="{{ role_value }}">{{ role_name }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm entity-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-user-tie me-2"></i> Propriétaires</h5>
-                        <p class="card-text">Gérez les propriétaires.</p>
-                        <a href="{% url 'proprietaire:proprietaires_list' %}" class="btn btn-primary entity-btn">
-                            <i class="fas fa-eye me-2"></i> Voir
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm entity-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-home me-2"></i> Maisons</h5>
-                        <p class="card-text">Gérez les propriétés.</p>
-                        <a href="{% url 'maison:maisons_list' %}" class="btn btn-primary entity-btn">
-                            <i class="fas fa-eye me-2"></i> Voir
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm entity-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-users me-2"></i> Locataires</h5>
-                        <p class="card-text">Gérez les locataires.</p>
-                        <a href="{% url 'locataire:recherche_maisons' %}" class="btn btn-primary entity-btn">
-                            <i class="fas fa-eye me-2"></i> Voir
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm entity-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-file-signature me-2"></i> Souscriptions</h5>
-                        <p class="card-text">Gérez les souscriptions.</p>
-                        <a href="{% url 'souscription:souscription_list' %}" class="btn btn-primary entity-btn">
-                            <i class="fas fa-eye me-2"></i> Voir
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm entity-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-file-contract me-2"></i> Contrats</h5>
-                        <p class="card-text">Gérez les contrats.</p>
-                        <a href="{% url 'contrat:contrat_list' %}" class="btn btn-primary entity-btn">
-                            <i class="fas fa-eye me-2"></i> Voir
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm entity-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-home me-2"></i> Gestion de biens</h5>
-                        <p class="card-text">Gérez les biens immobiliers.</p>
-                        <a href="{% url 'agence:gestion_biens' %}" class="btn btn-primary entity-btn">
-                            <i class="fas fa-eye me-2"></i> Voir
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm entity-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-file-contract me-2"></i> Gestion des contrats</h5>
-                        <p class="card-text">Gérez les contrats d'agence.</p>
-                        <a href="{% url 'agence:gestion_contrats' %}" class="btn btn-primary entity-btn">
-                            <i class="fas fa-eye me-2"></i> Voir
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100 shadow-sm entity-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-chart-bar me-2"></i> Rapports</h5>
-                        <p class="card-text">Consultez les rapports d'agence.</p>
-                        <a href="{% url 'agence:rapports' %}" class="btn btn-primary entity-btn">
-                            <i class="fas fa-eye me-2"></i> Voir
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <button type="submit" class="btn btn-primary">Accéder</button>
+        </form>
+        <p class="text-center mt-3">
+            Pas encore inscrit ? <a href="{% url 'register' %}">Créer un compte</a>
+        </p>
+        <p class="text-center">
+            Déjà inscrit ? <a href="{% url 'login' %}">Se connecter</a>
+        </p>
     </div>
 {% endblock %}
 {% block extra_css %}

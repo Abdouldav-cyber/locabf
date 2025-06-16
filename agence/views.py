@@ -10,47 +10,60 @@ from contrat.models import Contrat
 from .forms import AgenceForm, EmployeForm
 from django.contrib.auth.models import User
 
-# Permissions
-def agence_permission(agence_id=None):
+# Décorateur personnalisé pour les permissions d'agence
+def agence_permission(agence_id_param=None):
     def decorator(view_func):
-        @login_required
         def wrapper(request, *args, **kwargs):
             if not request.user.is_authenticated:
                 return HttpResponseForbidden("Vous devez être connecté.")
+            
             if request.user.is_superuser:
-                kwargs['agence'] = Agence.objects.first()  # Superuser gets first agency or None
-                return view_func(request, *args, **kwargs)
-            try:
-                if agence_id and isinstance(agence_id, str):
-                    agence = get_object_or_404(Agence, id=kwargs.get(agence_id), employes=request.user)
+                if agence_id_param:
+                    agence_id = kwargs.get(agence_id_param)
+                    agence = get_object_or_404(Agence, id=agence_id)
+                else:
+                    agence = Agence.objects.first()
+            else:
+                if agence_id_param:
+                    agence_id = kwargs.get(agence_id_param)
+                    agence = get_object_or_404(Agence, id=agence_id, users=request.user)
                 else:
                     agence = request.user.agences.first()
-                if not agence:
-                    return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
-                kwargs['agence'] = agence
-                return view_func(request, *args, **kwargs)
-            except Agence.DoesNotExist:
-                return HttpResponseForbidden("Vous n'êtes pas associé à cette agence.")
+            
+            if not agence:
+                return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+            
+            kwargs['agence'] = agence
+            return view_func(request, *args, **kwargs)
         return wrapper
     return decorator
 
-def agence_required(view_func):
-    def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponseForbidden("Vous devez être connecté.")
-        agence_id = kwargs.get('agence_id')
-        if agence_id:
-            agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
-        else:
-            agence = request.user.agences.first()
-        if not agence:
-            return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
-        kwargs['agence'] = agence
-        return view_func(request, *args, **kwargs)
-    return _wrapped_view
+# Décorateur pour les rôles
+def role_required(roles):
+    def decorator(view_func):
+        def _wrapped_view(request, *args, **kwargs):
+            if not request.user.is_authenticated or (request.user.role and request.user.role not in roles):
+                messages.error(request, "Vous n'avez pas les permissions nécessaires.")
+                return redirect('login')
+            return view_func(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator
 
-# Views
+# Vue home
+class HomeView(LoginRequiredMixin, TemplateView):
+    template_name = 'home.html'
+    login_url = '/accounts/login/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        agence = self.request.user.agences.first()
+        if self.request.user.is_superuser and not agence:
+            agence = Agence.objects.first()
+        context['agence'] = agence
+        return context
+
 @agence_permission()
+@role_required(['admin', 'employe'])
 def dashboard(request, agence=None):
     maisons_count = Maison.objects.filter(agence=agence).count()
     contrats_count = Contrat.objects.filter(agence=agence, statut='actif').count()
@@ -68,8 +81,10 @@ class GestionBiensView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         agence = self.request.user.agences.first()
-        if not agence:
+        if not agence and not self.request.user.is_superuser:
             return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+        if self.request.user.is_superuser:
+            agence = Agence.objects.first()
         context['maisons'] = Maison.objects.filter(agence=agence)
         context['agence'] = agence
         return context
@@ -80,8 +95,10 @@ class GestionContratsView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         agence = self.request.user.agences.first()
-        if not agence:
+        if not agence and not self.request.user.is_superuser:
             return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+        if self.request.user.is_superuser:
+            agence = Agence.objects.first()
         context['contrats'] = Contrat.objects.filter(agence=agence)
         context['agence'] = agence
         return context
@@ -92,8 +109,10 @@ class RapportsView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         agence = self.request.user.agences.first()
-        if not agence:
+        if not agence and not self.request.user.is_superuser:
             return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+        if self.request.user.is_superuser:
+            agence = Agence.objects.first()
         context['maisons_count'] = Maison.objects.filter(agence=agence).count()
         context['contrats_count'] = Contrat.objects.filter(agence=agence, statut='actif').count()
         context['taux_occupation'] = (context['contrats_count'] / context['maisons_count'] * 100) if context['maisons_count'] > 0 else 0
@@ -101,21 +120,23 @@ class RapportsView(LoginRequiredMixin, TemplateView):
         return context
 
 @agence_permission()
+@role_required(['admin', 'employe'])
 def agence_list(request, agence=None):
     if request.user.is_superuser:
-        agences = Agence.objects.all()  # Superusers see all agencies
+        agences = Agence.objects.all()
     else:
-        agences = request.user.agences.all()  # Regular users see their agencies
+        agences = request.user.agences.all()
     return render(request, 'agence/agence_list.html', {'agences': agences, 'agence': agence})
 
 @agence_permission()
+@role_required(['admin'])
 def agence_create(request, agence=None):
     if request.method == 'POST':
         form = AgenceForm(request.POST, request.FILES)
         if form.is_valid():
             agence = form.save(commit=False)
-            agence.employes.add(request.user)
             agence.save()
+            agence.users.add(request.user)
             messages.success(request, "Agence créée avec succès.")
             return redirect('agence:agence_list')
         else:
@@ -124,10 +145,9 @@ def agence_create(request, agence=None):
         form = AgenceForm()
     return render(request, 'agence/agence_create.html', {'form': form})
 
-@agence_permission(agence_id='agence_id')
+@agence_permission(agence_id_param='agence_id')
+@role_required(['admin'])
 def agence_update(request, agence_id, agence=None):
-    if not agence:
-        agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
     if request.method == 'POST':
         form = AgenceForm(request.POST, request.FILES, instance=agence)
         if form.is_valid():
@@ -140,34 +160,37 @@ def agence_update(request, agence_id, agence=None):
         form = AgenceForm(instance=agence)
     return render(request, 'agence/agence_update.html', {'form': form, 'agence': agence})
 
-@agence_permission(agence_id='agence_id')
+@agence_permission(agence_id_param='agence_id')
+@role_required(['admin'])
 def agence_delete(request, agence_id, agence=None):
-    if not agence:
-        agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
     if request.method == 'POST':
         agence.delete()
         messages.success(request, "Agence supprimée avec succès.")
         return redirect('agence:agence_list')
     return render(request, 'agence/agence_delete.html', {'agence': agence})
 
-@agence_permission(agence_id='agence_id')
+@agence_permission(agence_id_param='agence_id')
+@role_required(['admin', 'employe'])
 def agence_detail(request, agence_id, agence=None):
-    if not agence:
-        agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
     return render(request, 'agence/agence_detail.html', {'agence': agence})
 
-@agence_permission(agence_id='agence_id')
+@agence_permission(agence_id_param='agence_id')
+@role_required(['admin'])
 def ajouter_employe(request, agence_id, agence=None):
-    if not agence:
-        agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
     if request.method == 'POST':
         form = EmployeForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
-            user = get_object_or_404(User, email=email)
-            agence.employes.add(user)
-            messages.success(request, "Employé ajouté avec succès.")
-            return redirect('agence:agence_list')
+            try:
+                user = User.objects.get(email=email)
+                if user in agence.users.all():
+                    messages.error(request, "Cet employé est déjà associé à l'agence.")
+                else:
+                    agence.users.add(user)
+                    messages.success(request, "Employé ajouté avec succès.")
+                    return redirect('agence:agence_list')
+            except User.DoesNotExist:
+                messages.error(request, "Aucun utilisateur trouvé avec cet email.")
         else:
             messages.error(request, "Erreur dans le formulaire.")
     else:
@@ -177,6 +200,8 @@ def ajouter_employe(request, agence_id, agence=None):
 @login_required
 def ajouter_employe_default(request):
     agence = request.user.agences.first()
-    if not agence:
+    if not agence and not request.user.is_superuser:
         return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
+    if request.user.is_superuser:
+        agence = Agence.objects.first()
     return redirect('agence:ajouter_employe', agence_id=agence.id)

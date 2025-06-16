@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block title %}Liste des Propriétaires{% endblock %}
+{% block content %}
+    <div class="container my-5">
+        <h1 class="text-center mb-4"><i class="fas fa-user-tie"></i> Liste des Propriétaires</h1>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for proprietaire in proprietaires %}
+                            <tr>
+                                <td>{{ proprietaire.nom_complet }}</td>
+                                <td>{{ proprietaire.email }}</td>
+                                <td>
+                                    <a href="{% url 'proprietaire:proprietaire_update' proprietaire.id agence.id %}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <a href="{% url 'proprietaire:proprietaire_delete' proprietaire.id agence.id %}" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3">Aucun propriétaire trouvé.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{% url 'proprietaire:proprietaire_create' agence.id %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Ajouter un Propriétaire
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

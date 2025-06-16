@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block title %}Accès Locataire - LOCABF{% endblock %}
+{% block content %}
+    <div class="dashboard-container py-5">
+        <h1 class="text-center mb-5">
+            <i class="fas fa-tachometer-alt me-2"></i> BIENVENUE SUR LOCABF UNE PLATEFORME DE GESTION IMMOBILIERE
+        </h1>
+        <!-- Entity Cards -->
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card h-100 shadow-sm entity-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-users me-2"></i> Locataires</h5>
+                        <p class="card-text">Gérez vos informations.</p>
+                        <div class="btn-group">
+                            <a href="{% url 'locataire:recherche_maisons' %}" class="btn btn-primary entity-btn">
+                                <i class="fas fa-eye me-2"></i> Voir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm entity-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-file-signature me-2"></i> Souscriptions</h5>
+                        <p class="card-text">Consultez vos souscriptions.</p>
+                        <div class="btn-group">
+                            <a href="{% url 'souscription:souscription_list' %}" class="btn btn-primary entity-btn">
+                                <i class="fas fa-eye me-2"></i> Voir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm entity-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-file-contract me-2"></i> Contrats</h5>
+                        <p class="card-text">Consultez vos contrats.</p>
+                        <div class="btn-group">
+                            <a href="{% url 'contrat:contrat_list' %}" class="btn btn-primary entity-btn">
+                                <i class="fas fa-eye me-2"></i> Voir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .entity-btn {
+            width: 120px;
+        }
+    </style>
+{% endblock %}

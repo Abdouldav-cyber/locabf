@@ -19,13 +19,51 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Connexion</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'register' %}"><i class="fas fa-user-plus"></i> Inscription</a></li>
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                            <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-link btn btn-link text-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+                            </form>
+                        </li>
+                        {% if request.user.role == 'admin' or request.user.is_superuser %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'access_admin' %}"><i class="fas fa-user-shield"></i> Admin</a>
+                            </li>
+                        {% elif request.user.role == 'employe' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'access_employe' %}"><i class="fas fa-user-tie"></i> Employé</a>
+                            </li>
+                        {% elif request.user.role == 'proprietaire' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'access_proprietaire' %}"><i class="fas fa-user-tie"></i> Propriétaire</a>
+                            </li>
+                        {% elif request.user.role == 'locataire' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'access_locataire' %}"><i class="fas fa-user"></i> Locataire</a>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Connexion</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}"><i class="fas fa-user-plus"></i> Inscription</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container mt-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
         {% block content %}
         {% endblock %}
     </div>

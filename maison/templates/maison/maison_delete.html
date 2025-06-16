@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block title %}Supprimer une Maison - LOCABF{% endblock %}
+{% block content %}
+    <div class="dashboard-container py-5">
+        <h1 class="text-center mb-5">Supprimer {{ maison.titre }}</h1>
+        <p>Êtes-vous sûr de vouloir supprimer cette maison ? Cette action est irréversible.</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+            <a href="{% url 'maison:maison_detail' maison.pk %}" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+{% endblock %}

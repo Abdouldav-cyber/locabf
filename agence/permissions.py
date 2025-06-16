@@ -5,9 +5,9 @@ from .models import Agence
 
 def agence_permission(agence_id=None):
     def check_agence(user):
-        if not user.is_authenticated:  # Vérifie l'authentification de l'utilisateur
+        if not user.is_authenticated:
             return False
-        if user.is_superuser:  # Superuser a accès à tout
+        if user.is_superuser:
             return True
         try:
             agence = user.agences.get(id=agence_id) if agence_id else user.agences.first()
@@ -18,15 +18,13 @@ def agence_permission(agence_id=None):
 
 def agence_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated:  # Vérifie l'authentification ici
+        if not request.user.is_authenticated:
             return HttpResponseForbidden("Vous devez être connecté.")
-        agence_id = kwargs.get('agence_id')  # Récupère agence_id depuis les kwargs
-        if agence_id:
-            agence = get_object_or_404(Agence, id=agence_id, employes=request.user)
-        else:
-            agence = request.user.agences.first()
-        if not agence:
-            return HttpResponseForbidden("Vous n'êtes pas associé à une agence.")
-        kwargs['agence'] = agence
+        agence_id = kwargs.get('agence_id')  # Récupère agence_id des kwargs
+        agence = get_object_or_404(Agence, id=agence_id) if agence_id else request.user.agences.first()
+        if not agence or (agence_id and agence not in request.user.agences.all()):
+            return HttpResponseForbidden("Vous n'êtes pas autorisé à accéder à cette agence.")
+        # Passe agence_id au lieu d'ajouter un nouvel argument
+        kwargs['agence_id'] = agence_id
         return view_func(request, *args, **kwargs)
     return _wrapped_view

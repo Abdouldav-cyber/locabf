@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block title %}Accès Propriétaire - LOCABF{% endblock %}
+{% block content %}
+    <div class="dashboard-container py-5">
+        <h1 class="text-center mb-5">
+            <i class="fas fa-tachometer-alt me-2"></i> BIENVENUE SUR LOCABF UNE PLATEFORME DE GESTION IMMOBILIERE
+        </h1>
+        <!-- Entity Cards -->
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card h-100 shadow-sm entity-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-user-tie me-2"></i> Propriétaires</h5>
+                        <p class="card-text">Gérez vos informations.</p>
+                        <div class="btn-group">
+                            <a href="{% url 'proprietaire:proprietaires_list' %}" class="btn btn-primary entity-btn">
+                                <i class="fas fa-eye me-2"></i> Voir
+                            </a>
+                            {% if request.user.role == 'proprietaire' %}
+                                <a href="{% url 'proprietaire:proprietaire_create' request.user.agence.id|default:1 %}" class="btn btn-success entity-btn">
+                                    <i class="fas fa-plus me-2"></i> Ajouter
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm entity-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-home me-2"></i> Maisons</h5>
+                        <p class="card-text">Gérez vos propriétés.</p>
+                        <div class="btn-group">
+                            {% if request.user.agence %}
+                                <a href="{% url 'maison:maisons_list' request.user.agence.id %}" class="btn btn-primary entity-btn">
+                                    <i class="fas fa-eye me-2"></i> Voir la liste
+                                </a>
+                            {% else %}
+                                <p class="text-warning">Aucune agence associée. Ajoutez une agence.</p>
+                            {% endif %}
+                            {% if request.user.role == 'proprietaire' %}
+                                <a href="{% url 'maison:maison_create' %}" class="btn btn-success entity-btn">
+                                    <i class="fas fa-plus me-2"></i> Ajouter
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm entity-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-file-contract me-2"></i> Contrats</h5>
+                        <p class="card-text">Consultez vos contrats.</p>
+                        <div class="btn-group">
+                            <a href="{% url 'contrat:contrat_list' %}" class="btn btn-primary entity-btn">
+                                <i class="fas fa-eye me-2"></i> Voir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .entity-btn {
+            width: 120px;
+        }
+    </style>
+{% endblock %}

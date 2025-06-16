@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Profil Propriétaire{% endblock %}
+{% block content %}
+    <div class="py-5 bg-light">
+        <div class="container">
+            <h1 class="display-4 mb-4">Profil Propriétaire</h1>
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title">{{ proprietaire.nom_complet }}</h5>
+                    <p><strong>Email :</strong> {{ proprietaire.email }}</p>
+                    <p><strong>Téléphone :</strong> {{ proprietaire.telephone }}</p>
+                    <p><strong>Adresse :</strong> {{ proprietaire.adresse }}</p>
+                    <p><strong>Date de naissance :</strong> {{ proprietaire.date_naissance }}</p>
+                    <p><strong>Date d'inscription :</strong> {{ proprietaire.date_inscription }}</p>
+                    <p><strong>Statut :</strong> {% if proprietaire.statut_actif %}Actif{% else %}Inactif{% endif %}</p>
+                    <a href="{% url 'maison_list' %}" class="btn btn-primary mt-3">Voir mes biens</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
